@@ -3,10 +3,12 @@
 #include <cstring>
 #include <thread>
 #include <vector>
+#include <unistd.h>
 #include "init.h"
 
-void peculiar::runExe(std::string value)
-{
+
+//function to run external command and executable
+void peculiar::runExe(std::string value){
     std::mutex m;
     std::thread t{[&]
         {
@@ -16,6 +18,8 @@ void peculiar::runExe(std::string value)
     };
     t.join();
 }
+
+//function to split string by delimiter provided
 std::vector<std::string> peculiar::str_split(std::string str,std::string del){
     std::vector<std::string> cmdStrArray;
     int start = 0;
@@ -30,33 +34,40 @@ std::vector<std::string> peculiar::str_split(std::string str,std::string del){
 }
 
 
+//function to change current directory
+void changeDir(std::string dir_name){
+    chdir(dir_name.c_str());
+}
  
-std::string peculiar::setCommand(std::vector<std::string> busyboxCmd,std::string cmd)
-{
+
+
+//function to set command string 
+std::string peculiar::setCommand(std::vector<std::string> busyboxCmd,std::string cmd){
     std::vector<std::string> cmdArr = peculiar::str_split(cmd," ");
     std::string newCommand = "";
-    for(int i = 0; i < busyboxCmd.size();i++)
-    {
-        if (cmdArr[0] == busyboxCmd[i])
-        {
+    for(int i = 0; i < busyboxCmd.size();i++){
+        if (cmdArr[0] == busyboxCmd[i]){
             newCommand = "busybox " + cmd;
         }
     }
-    if (newCommand == ""){
+    if(cmdArr[0] == "cd"){
+        changeDir(cmdArr[1]);
+        return "";
+    }
+    if(newCommand == ""){
         return cmd;
     }
-    else
-    {
+    else{
        return newCommand;
     }
 }
 
-std::vector<std::string> peculiar::getBusyboxCommand()
-{
+
+//function to get busybox command and return a string
+std::vector<std::string> peculiar::getBusyboxCommand(){
     std::vector<std::string> busyboxCmd = {
         "vi","wget","su","whoami","whois","bash"
         "sh","env","pwd","tar","find","grep"
     };
     return busyboxCmd;
 }
-
